@@ -8,13 +8,14 @@ data = 10
 users = {}
 
 def get_hashtags_posts(query):
+    global df
     posts = loader.get_hashtag_posts(query)
     count = 0
     for post in posts:
         profile = post.owner_profile
-        if profile.username not in users and ("India" in profile.biography):  #  or post.location
+        if profile.username not in users:# and ("India" in profile.biography):  #  or post.location
             users[profile.username]=True
-            df.append([profile.username,profile.external_url,profile.biography])
+            df=df.append([[profile.username,profile.external_url,profile.biography]])
             count += 1
             print('{}: {}'.format(count, profile.username))
             if count == data:
@@ -23,4 +24,4 @@ def get_hashtags_posts(query):
 if __name__ == "__main__":
     hashtag = "clothes"
     get_hashtags_posts(hashtag)
-    df.to_csv(index=False)
+    df.to_csv("data.csv",index=False)
