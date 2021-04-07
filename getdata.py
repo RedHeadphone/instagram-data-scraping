@@ -23,5 +23,8 @@ def get_hashtags_posts(query):
 
 if __name__ == "__main__":
     hashtag = "clothes"
-    get_hashtags_posts(hashtag)
-    df.to_csv("data.csv",index=False)
+    try:
+        get_hashtags_posts(hashtag)
+        df.to_csv("data.csv",index=False)
+    except:
+        df.to_csv("data.csv",index=False)
