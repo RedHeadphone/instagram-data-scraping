@@ -15,7 +15,7 @@ cred = credentials.Certificate({
     "type": "service_account",
   "project_id": "instagram-data-scraping",
   "private_key_id": os.getenv("FIREBASE_PKI"),
-  "private_key": os.getenv("FIREBASE_PK"),
+  "private_key": os.getenv("FIREBASE_PK").replace('\\n', '\n'),
   "client_email": "firebase-adminsdk-m62gv@instagram-data-scraping.iam.gserviceaccount.com",
   "client_id": "117155528461940603699",
   "auth_uri": "https://accounts.google.com/o/oauth2/auth",
