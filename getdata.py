@@ -44,10 +44,10 @@ def get_hashtags_posts(query):
             lng = (post.location).lng
             location = geolocator.reverse(str(lat)+","+str(lng))
             address = location.raw['address']
-	        country = address.get('country', '')
+            country = address.get('country', '')
         else:
             country=""
-        if profile.username not in users and ("India" in profile.biography or country="India") : 
+        if profile.username not in users and ("India" in profile.biography or country=="India") : 
             users[profile.username]=True
             # df=df.append([[profile.username,profile.external_url,profile.biography]])
             db.collection(u'cloth').document(profile.username).set({"username":profile.username,"contact":profile.external_url,"bio":profile.biography})
