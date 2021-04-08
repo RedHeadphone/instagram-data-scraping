@@ -31,7 +31,7 @@ db = firestore.client()
 
 loader = Instaloader()
 loader.login(os.getenv("IGUSER"),os.getenv("IGPASSWORD"))
-data = 10
+data = 10000
 users = {}
 country=""
 
