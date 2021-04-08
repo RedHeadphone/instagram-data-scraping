@@ -6,6 +6,8 @@ from geopy.geocoders import Nominatim
 geolocator = Nominatim(user_agent="geoapiExercises")
 load_dotenv()
 
+print(os.getenv("IGUSER"))
+
 import firebase_admin
 from firebase_admin import credentials,firestore
 
