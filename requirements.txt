@@ -1,0 +1,5 @@
+instaloader
+geopy
+firebase-admin
+python-dotenv
+os-sys
