@@ -1,5 +1,5 @@
 from instaloader import Instaloader, Profile
-import pandas as pd
+# import pandas as pd
 from dotenv import load_dotenv
 import os
 from geopy.geocoders import Nominatim
