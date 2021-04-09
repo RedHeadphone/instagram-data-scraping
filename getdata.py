@@ -1,7 +1,7 @@
 from instaloader import Instaloader, Profile
 # import pandas as pd
 from dotenv import load_dotenv
-import os
+import os,asyncio
 from geopy.geocoders import Nominatim
 geolocator = Nominatim(user_agent="geoapiExercises")
 load_dotenv()
@@ -31,33 +31,65 @@ db = firestore.client()
 
 loader = Instaloader()
 loader.login(os.getenv("IGUSER"),os.getenv("IGPASSWORD"))
-data = 10000
+data = 5000
 users = {}
-country=""
+users_ref = db.collection(u'cloth')
+docs = users_ref.stream()
 
-def get_hashtags_posts(query):
-    global df
+for doc in docs:
+    users[doc.id]=True
+count = len(users.keys())
+
+print(count)
+
+async def checkprofile(profile,country):
+    global count
+    if profile.username not in users and ("India" in profile.biography or country=="India") : 
+        users[profile.username]=True
+        # df=df.append([[profile.username,profile.external_url,profile.biography]])
+        db.collection(u'cloth').document(profile.username).set({"username":profile.username,"contact":profile.external_url,"bio":profile.biography})
+        count += 1
+        print('{}: {}'.format(count, profile.username))
+        c=0
+        for i in profile.get_similar_accounts():
+            asyncio.create_task(checkprofile(i,""))
+            c+=1
+            if c==5:
+                break
+        if count == data:
+            exit()
+
+async def get_hashtags_posts(query):
+    # global df
     posts = loader.get_hashtag_posts(query)
-    count = 0
     for post in posts:
         profile = post.owner_profile
-        if post.location is not None:
-            lat = (post.location).lat
-            lng = (post.location).lng
-            location = geolocator.reverse(str(lat)+","+str(lng))
-            address = location.raw['address']
-            country = address.get('country', '')
-        else:
+        try:
+            if post.location is not None:
+                lat = (post.location).lat
+                lng = (post.location).lng
+                location = geolocator.reverse(str(lat)+","+str(lng))
+                address = location.raw['address']
+                country = address.get('country', '')
+            else:
+                country=""
+        except:
             country=""
-        if profile.username not in users and ("India" in profile.biography or country=="India") : 
-            users[profile.username]=True
-            # df=df.append([[profile.username,profile.external_url,profile.biography]])
-            db.collection(u'cloth').document(profile.username).set({"username":profile.username,"contact":profile.external_url,"bio":profile.biography})
-            count += 1
-            print('{}: {}'.format(count, profile.username))
-            if count == data:
-                break
+        await checkprofile(profile,country)
+        
 
-if __name__ == "__main__":
-    hashtag = "cloths"
-    get_hashtags_posts(hashtag)
+async def main():
+   # hashtag = "cloths"
+    hashtags = ["clothes",  "clothing",  "clothingline",  "clothingbrand",  "cloth",  "clothesforsale",  "CLOTHINGSTORE","clothingcompany",  "cloths",
+   "clothings",   "clothingforsale", "clothingbrands","clothesline", "clothingsale", "clothingco", "fashion"]
+    do=True
+    while do:
+        try:
+            for hashtag in hashtags:
+                last=asyncio.create_task(get_hashtags_posts(hashtag))
+            await last
+        except:
+            asyncio.sleep(10)
+        #do=False
+
+asyncio.run(main())

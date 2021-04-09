@@ -77,10 +77,9 @@ def get_hashtags_posts(hashtag_list):
 
 if __name__ == "__main__":
     hashtag = [
-"clothes",  "clothing",  "clothingline",  "clothingbrand",  "cloth",  "clothesforsale",  "CLOTHINGSTORE", 
- "clothe" , "clothingcompany",  "cloths",  "clothingdesigner", "clothingbandung",  "clothdiapers", 
-  "clothinglabel",  "ClothingLines" , "clothingdesign" , "clothingforcarpeople", "clothingboutique", 
-   "clothings",  "clothdoll",  "clothdiaper",  "clothesph",  "clothingforsale", "clothingindonesia", "clothingbrands",
-    "clothesline",  "clothesa",  "clothesshop", "clothingsale", "clothingco", "fashion", "jeans", "jeansindia", "shirts", "wrogn"
+"clothes",  "clothing",  "clothingline",  "clothingbrand",  "cloth",  "clothesforsale",  "CLOTHINGSTORE",
+ "clothingcompany",  "cloths",
+   "clothings",   "clothingforsale", "clothingbrands",
+    "clothesline", "clothingsale", "clothingco", "fashion"
     ]
     get_hashtags_posts(hashtag_list)
