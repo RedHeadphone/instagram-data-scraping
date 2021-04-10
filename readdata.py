@@ -4,6 +4,9 @@ from dotenv import load_dotenv
 import os
 load_dotenv()
 import re
+from instaloader import Instaloader, Profile
+loader = Instaloader()
+loader.login(os.getenv("IGUSER"),os.getenv("IGPASSWORD"))
 
 Phonenumber=re.compile(r'(\+91\s\d{10}|\+91\d{10}|91\d{10}|\d{10})')
 import firebase_admin
@@ -23,7 +26,7 @@ cred = credentials.Certificate({
 })
 firebase_admin.initialize_app(cred)
 
-df=pd.DataFrame([],columns=["username","contact","bio","phone_num","email"])
+df=pd.DataFrame([],columns=["username","contact","bio","phone_num","email","followers"])
 
 db = firestore.client()
 
@@ -36,6 +39,8 @@ for doc in docs:
     k=Phonenumber.findall(de["bio"])
     de["phone_num"]=" ".join(k) if len(k)>0 else None
     de["email"]=" ".join(lst) if len(lst)>0 else None
+    if not ("followers" in de.keys()):
+        de["followers"]=Profile.from_username(loader.context,de["username"]).followers
     df=df.append(de,ignore_index=True)
 
 df.to_csv("data.csv")
