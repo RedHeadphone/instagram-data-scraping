@@ -1,20 +1,18 @@
-from instaloader import Instaloader, Profile
-import pandas as pd
-from geopy.geocoders import Nominatim
-geolocator = Nominatim(user_agent="geoapiExercises")
-L = Instaloader()
-L.login("", "")
-profile = Profile.from_username(L.context, "ashish_j96")
-for post in profile.get_posts():
-	print(profile.username)
-	print("....")
-	if post.location is not None:
-		lat = (post.location).lat
-		lng = (post.location).lng
-		location = geolocator.reverse(str(lat)+","+str(lng))
-		address = location.raw['address']
-	
-		country = address.get('country', '')
-		print(country)
+#get similar accounts
 
-	
+def get_similar_accounts(given_profile):
+	for profile in given_profile.get_similar_accounts():
+		if profile.username not in users and ("India" in profile.biography) : 
+	        users[profile.username]=True
+	        # df=df.append([[profile.username,profile.external_url,profile.biography]])
+	        db.collection(u'cloth').document(profile.username).set({"username":profile.username,"contact":profile.external_url,"bio":profile.biography})
+	        count += 1
+	        print('{}: {}'.format(count, profile.username))
+	        # c=0
+	        # for i in profile.get_similar_accounts():
+	        #     asyncio.create_task(checkprofile(i,""))
+	        #     c+=1
+	        #     if c==5:
+	        #         break
+	        if count == data:
+	            exit()
