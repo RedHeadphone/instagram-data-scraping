@@ -39,8 +39,11 @@ for doc in docs:
     k=Phonenumber.findall(de["bio"])
     de["phone_num"]=" ".join(k) if len(k)>0 else None
     de["email"]=" ".join(lst) if len(lst)>0 else None
-    if not ("followers" in de.keys()):
-        de["followers"]=Profile.from_username(loader.context,de["username"]).followers
+    try:
+        if not ("followers" in de.keys()):
+            de["followers"]=Profile.from_username(loader.context,de["username"]).followers
+    except:
+        pass
     df=df.append(de,ignore_index=True)
 
 df.to_csv("data.csv")

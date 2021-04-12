@@ -95,10 +95,10 @@ async def get_hashtags_posts(query):
     posts = loader.get_hashtag_posts(query)
     for post in posts:
         count_for_operations+=1
-        print("calls ->", count_for_operations)
-        if count_for_operations >= 5:
+        #print("calls ->", count_for_operations)
+        if count_for_operations >= 100:
             change()
-            print("changed to ->", end = "")
+            #print("changed to ->", end = "")
             print(loader.test_login())
             count_for_operations = 0
         profile = post.owner_profile
