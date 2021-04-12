@@ -39,6 +39,18 @@ for doc in docs:
 count = len(users.keys())
 
 print(count)
+counter_for_index = 1
+usernames = ["insta_internship1", "insta_internship2", "insta_internship3", "insta_internship4", "insta_internship5"]
+
+def change():
+    global loader
+    global counter_for_index
+    new_username = usernames[counter_for_index%5]
+    loader.login(new_username,os.getenv("IGPASSWORD"))
+    counter_for_index += 1
+    counter_for_index = counter_for_index%5
+
+count_for_operations = 0
 
 async def simpro():
     global hashtags
@@ -79,8 +91,16 @@ async def checkprofile(profile,country):
             exit()
 
 async def get_hashtags_posts(query):
+    global count_for_operations
     posts = loader.get_hashtag_posts(query)
     for post in posts:
+        count_for_operations+=1
+        print("calls ->", count_for_operations)
+        if count_for_operations >= 5:
+            change()
+            print("changed to ->", end = "")
+            print(loader.test_login())
+            count_for_operations = 0
         profile = post.owner_profile
         try:
             if post.location is not None:
