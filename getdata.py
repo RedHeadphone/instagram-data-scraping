@@ -45,7 +45,7 @@ async def simpro():
     global hashtags
     while True:
         if len(sim)==0:
-            asyncio.sleep(5)
+            await asyncio.sleep(10)
         else:
             a=sim.pop(0)
             k=0
@@ -53,6 +53,7 @@ async def simpro():
             for post in a.get_posts():
                 for h in post.caption_hashtags:
                     if h in hashtags:
+                        print("+1 from similar accounts")
                         asyncio.create_task(checkprofile(a,""))
                         don=True
                         break
@@ -67,7 +68,7 @@ async def checkprofile(profile,country):
     global count
     if profile.username not in users and ("India" in profile.biography or country=="India") : 
         users[profile.username]=True
-        db.collection(u'cloth').document(profile.username).set({"username":profile.username,"contact":profile.external_url,"bio":profile.biography})
+        db.collection(u'cloth').document(profile.username).set({"username":profile.username,"contact":profile.external_url,"bio":profile.biography,"followers":profile.followers})
         count += 1
         print('{}: {}'.format(count, profile.username))
         c=0
@@ -110,7 +111,7 @@ async def main():
             asyncio.create_task(simpro())
             await last
         except:
-            asyncio.sleep(10)
+            await asyncio.sleep(10)
         #do=False
 
 asyncio.run(main())
