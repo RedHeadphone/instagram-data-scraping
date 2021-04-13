@@ -1,3 +1,4 @@
+instaloader
 geopy
 firebase-admin
 python-dotenv
