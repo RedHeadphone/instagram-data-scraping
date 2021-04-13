@@ -82,10 +82,7 @@ async def checkprofile(profile,country):
 
 async def get_hashtags_posts(query):
     global count_for_operations
-    try:
-        posts = loader.get_hashtag_posts(query)
-    except:
-        print(query,"graphql error")
+    posts = loader.get_hashtag_posts(query)
     for post in posts:
         profile = post.owner_profile
         try:
@@ -101,16 +98,15 @@ async def get_hashtags_posts(query):
             country=""
         await checkprofile(profile,country)
 
-hashtags = ["clothes",  "clothing",  "clothingbrand",  "cloth",  "clothesforsale",  "cloths","clothings","clothingbrands","clothesline", "clothingsale"]
+hashtags = ["clothes","clothing","clothingbrand","cloth","clothesforsale","cloths","clothings","clothingbrands","clothesline","clothingsale"]
 
 async def main():
     do=True
     while do:
         try:
             for hashtag in hashtags:
-                last=asyncio.create_task(get_hashtags_posts(hashtag))
-            asyncio.create_task(simpro())
-            await last
+                asyncio.create_task(get_hashtags_posts(hashtag))
+            await asyncio.create_task(simpro())
         except:
             await asyncio.sleep(10)
         #do=False
