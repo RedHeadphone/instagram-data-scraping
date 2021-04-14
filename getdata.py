@@ -87,12 +87,11 @@ async def get_hashtags_posts(hashtag):
     hasht = hashtaginfo["hashtag"]["edge_hashtag_to_media"]["edges"]
     for i in hasht:
         k=i["node"]["owner"]["id"]
-        print(k)
+        #print(k)
         r = requests.get('https://www.instagram.com/graphql/query/?query_hash=c9100bf9110dd6361671f113dd02e7d6&variables={"user_id":"'+k+'","include_chaining":false,"include_reel":true,"include_suggested_users":false,"include_logged_out_extras":false,"include_highlight_reels":false,"include_related_profiles":false}', headers=headers)
         user_info = r.json()["data"]["user"]["reel"]["user"]['username']
-        print(user_info)
+        checkprofile(user_info)
         #username.append(user_info)
-    return l
 
 
 
