@@ -7,7 +7,9 @@ headers = {
 }
 import firebase_admin
 from firebase_admin import credentials,firestore
-
+from instaloader import Profile,Instaloader
+L=Instaloader()
+L.login("data.scrap",os.getenv("IGPASSWORD"))
 cred = credentials.Certificate({
     "type": "service_account",
   "project_id": "instagram-data-scraping",
@@ -88,9 +90,10 @@ async def get_hashtags_posts(hashtag):
     for i in hasht:
         k=i["node"]["owner"]["id"]
         #print(k)
-        r = requests.get('https://www.instagram.com/graphql/query/?query_hash=c9100bf9110dd6361671f113dd02e7d6&variables={"user_id":"'+k+'","include_chaining":false,"include_reel":true,"include_suggested_users":false,"include_logged_out_extras":false,"include_highlight_reels":false,"include_related_profiles":false}', headers=headers)
-        user_info = r.json()["data"]["user"]["reel"]["user"]['username']
-        checkprofile(user_info)
+        # r = requests.get('https://www.instagram.com/graphql/query/?query_hash=c9100bf9110dd6361671f113dd02e7d6&variables={"user_id":"'+k+'","include_chaining":false,"include_reel":true,"include_suggested_users":false,"include_logged_out_extras":false,"include_highlight_reels":false,"include_related_profiles":false}', headers=headers)
+        # user_info = r.json()["data"]["user"]["reel"]["user"]['username']
+        user_info=Profile.from_id(L.context,k).username
+        await checkprofile(user_info)
         #username.append(user_info)
 
 
