@@ -80,14 +80,33 @@ async def checkprofile(username):
 
 hashtags = ["clothes","clothing","clothingbrand","cloth","clothesforsale","cloths","clothings","clothingbrands","clothesline","clothingsale"]
 
+
+async def get_hashtags_posts(hashtag):
+    r = requests.get(f"https://www.instagram.com/explore/tags/{hashtag}/?__a=1", headers=headers)
+    hashtaginfo = r.json()["graphql"]
+    hasht = hashtaginfo["hashtag"]["edge_hashtag_to_media"]["edges"]
+    for i in hasht:
+        k=i["node"]["owner"]["id"]
+        print(k)
+        r = requests.get('https://www.instagram.com/graphql/query/?query_hash=c9100bf9110dd6361671f113dd02e7d6&variables={"user_id":"'+k+'","include_chaining":false,"include_reel":true,"include_suggested_users":false,"include_logged_out_extras":false,"include_highlight_reels":false,"include_related_profiles":false}', headers=headers)
+        user_info = r.json()["data"]["user"]["reel"]["user"]['username']
+        print(user_info)
+        #username.append(user_info)
+    return l
+
+
+
+
 async def main():
-    do=True
-    while do:
-        try:
-            for hashtag in hashtags:
-                last=asyncio.create_task(get_hashtags_posts(hashtag))
-            await last
-        except:
-            await asyncio.sleep(10)
+    await get_hashtags_posts("cloth")
+    # do=True
+    # while do:
+    #     try:
+    #         for hashtag in hashtags:
+    #             last=asyncio.create_task(get_hashtags_posts(hashtag))
+    #         await last
+    #     except:
+    #         await asyncio.sleep(10)
 
 asyncio.run(main())
+
