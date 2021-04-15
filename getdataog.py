@@ -6,8 +6,6 @@ from geopy.geocoders import Nominatim
 geolocator = Nominatim(user_agent="geoapiExercises")
 load_dotenv()
 
-print(os.getenv("IGUSER"))
-
 import firebase_admin
 from firebase_admin import credentials,firestore
 
@@ -28,7 +26,8 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 loader = Instaloader()
-loader.login(os.getenv("IGUSER"),os.getenv("IGPASSWORD"))
+# loader.login(os.getenv("IGUSER"),os.getenv("IGPASSWORD"))
+# print(loader.test_login())
 data = 5000
 users = {}
 users_ref = db.collection(u'cloth')
