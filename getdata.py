@@ -99,16 +99,23 @@ async def get_hashtags_posts(hashtag):
 
 
 
-async def main():
-    await get_hashtags_posts("cloth")
-    # do=True
-    # while do:
-    #     try:
-    #         for hashtag in hashtags:
-    #             last=asyncio.create_task(get_hashtags_posts(hashtag))
-    #         await last
-    #     except:
-    #         await asyncio.sleep(10)
+# async def main():
+#     await get_hashtags_posts("cloth")
+#     # do=True
+#     # while do:
+#     #     try:
+#     #         for hashtag in hashtags:
+#     #             last=asyncio.create_task(get_hashtags_posts(hashtag))
+#     #         await last
+#     #     except:
+#     #         await asyncio.sleep(10)
 
-asyncio.run(main())
+# asyncio.run(main())
+
+r = requests.get("https://www.instagram.com/explore/tags/"+"cloth"+"/?__a=1", headers=headers)
+hashtaginfo = r.json()["graphql"]
+hasht = hashtaginfo["hashtag"]["edge_hashtag_to_media"]["edges"]
+for i in hasht:
+    k=i["node"]["owner"]["id"]
+    print(k)
 
