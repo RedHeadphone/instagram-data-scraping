@@ -1,15 +1,14 @@
+from instaloader import Instaloader, Profile
 from dotenv import load_dotenv
 import os,asyncio
-import requests
+from geopy.geocoders import Nominatim
+geolocator = Nominatim(user_agent="geoapiExercises")
 load_dotenv()
-headers = {
-    'User-Agent': ''
-}
+
+
 import firebase_admin
 from firebase_admin import credentials,firestore
-from instaloader import Profile,Instaloader
-L=Instaloader()
-L.login(os.getenv("IGUSER"),os.getenv("IGPASSWORD"))
+
 cred = credentials.Certificate({
     "type": "service_account",
   "project_id": "instagram-data-scraping",
@@ -26,6 +25,9 @@ firebase_admin.initialize_app(cred)
 
 db = firestore.client()
 
+loader = Instaloader()
+loader.login(os.getenv("IGUSER"),os.getenv("IGPASSWORD"))
+print(loader.test_login())
 data = 5000
 users = {}
 users_ref = db.collection(u'cloth')
@@ -38,86 +40,75 @@ count = len(users.keys())
 
 print(count)
 
-
-# async def simpro():
-#     global hashtags
-#     while True:
-#         if len(sim)==0:
-#             await asyncio.sleep(10)
-#         else:
-#             a=sim.pop(0)
-#             k=0
-#             don=False
-#             for post in a.get_posts():
-#                 for h in post.caption_hashtags:
-#                     if h in hashtags:
-#                         print("+1 from similar accounts")
-#                         asyncio.create_task(checkprofile(a,""))
-#                         don=True
-#                         break
-#                 if don:
-#                     break
-#                 k+=1
-#                 if k==5:
-#                     break
+async def simpro():
+    global hashtags
+    while True:
+        if len(sim)==0:
+            await asyncio.sleep(5)
+        else:
+            a=sim.pop(0)
+            k=0
+            don=False
+            for post in a.get_posts():
+                for h in post.caption_hashtags:
+                    if h in hashtags:
+                        await checkprofile(a,"")
+                        don=True
+                        break
+                if don:
+                    break
+                k+=1
+                if k==4:
+                    break
 
 
-async def checkprofile(username):
-    global count,headers
-    r = requests.get(f"https://www.instagram.com/{username}/?__a=1", headers=headers)
-    profile = r.json()["graphql"]["user"]
-    if (username not in users) and ("India" in profile["biography"]) : 
-        users[username]=True
-        db.collection(u'cloth').document(username).set({"username":username,"contact":profile["external_url"],"bio":profile["biography"],"followers":profile["followers"]})
+async def checkprofile(profile,country):
+    global count
+    if profile.username not in users and ("India" in profile.biography or country=="India") : 
+        users[profile.username]=True
+        db.collection(u'cloth').document(profile.username).set({"username":profile.username,"contact":profile.external_url,"bio":profile.biography,"followers":profile.followers})
         count += 1
-        print('{}: {}'.format(count,username))
-        # c=0
-        # for i in profile.get_similar_accounts():
-        #     sim.append(i)
-        #     c+=1
-        #     if c==10:
-        #         break
+        print('{}: {}'.format(count, profile.username))
+        c=0
+        for i in profile.get_similar_accounts():
+            sim.append(i)
+            c+=1
+            if c==4:
+                break
         if count == data:
             exit()
 
-hashtags = ["clothes","clothing","clothingbrand","cloth","clothesforsale","cloths","clothings","clothingbrands","clothesline","clothingsale"]
+async def get_hashtags_posts(query):
+    posts = loader.get_hashtag_posts(query)
+    for post in posts:
+        profile = post.owner_profile
+        try:
+            if post.location is not None:
+                lat = (post.location).lat
+                lng = (post.location).lng
+                location = geolocator.reverse(str(lat)+","+str(lng))
+                address = location.raw['address']
+                country = address.get('country', '')
+            else:
+                country=""
+        except:
+            country=""
+        await checkprofile(profile,country)
 
+hashtags = ["clothes",  "clothing",  "clothingbrand",  "cloth",  "clothesforsale",  "cloths",
+   "clothings","clothingbrands","clothesline", "clothingsale"]
 
-async def get_hashtags_posts(hashtag):
-    r = requests.get("https://www.instagram.com/explore/tags/"+hashtag+"/?__a=1", headers=headers)
-    hashtaginfo = r.json()["graphql"]
-    hasht = hashtaginfo["hashtag"]["edge_hashtag_to_media"]["edges"]
-    for i in hasht:
-        k=i["node"]["owner"]["id"]
-        #print(k)
-        # r = requests.get('https://www.instagram.com/graphql/query/?query_hash=c9100bf9110dd6361671f113dd02e7d6&variables={"user_id":"'+k+'","include_chaining":false,"include_reel":true,"include_suggested_users":false,"include_logged_out_extras":false,"include_highlight_reels":false,"include_related_profiles":false}', headers=headers)
-        # user_info = r.json()["data"]["user"]["reel"]["user"]['username']
-        user_info=Profile.from_id(L.context,k).username
-        await checkprofile(user_info)
-        #username.append(user_info)
+async def main():
+    global hashtags
+    do=True
+    while do:
+        try:
+            for hashtag in hashtags:
+                last=asyncio.create_task(get_hashtags_posts(hashtag))
+            asyncio.create_task(simpro())
+            await last
+        except:
+            await asyncio.sleep(10)
+        #do=False
 
-
-
-
-# async def main():
-#     await get_hashtags_posts("cloth")
-#     # do=True
-#     # while do:
-#     #     try:
-#     #         for hashtag in hashtags:
-#     #             last=asyncio.create_task(get_hashtags_posts(hashtag))
-#     #         await last
-#     #     except:
-#     #         await asyncio.sleep(10)
-
-# asyncio.run(main())
-
-r = requests.get("https://www.instagram.com/explore/tags/"+"cloth"+"/?__a=1", headers=headers)
-print(requests.__version__)
-print(r.text[:100])
-# hashtaginfo = r.json()["graphql"]
-# hasht = hashtaginfo["hashtag"]["edge_hashtag_to_media"]["edges"]
-# for i in hasht:
-#     k=i["node"]["owner"]["id"]
-#     print(k)
-
+asyncio.run(main())

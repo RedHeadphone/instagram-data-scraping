@@ -25,10 +25,8 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 loader = Instaloader()
-loader.login(os.getenv("IGUSER"),os.getenv("IGPASSWORD"))
-
-print(loader.test_login())
-
+# loader.login(os.getenv("IGUSER"),os.getenv("IGPASSWORD"))
+# print(loader.test_login())
 data = 5000
 users = {}
 users_ref = db.collection(u'cloth')
@@ -41,12 +39,11 @@ count = len(users.keys())
 
 print(count)
 
-
 async def simpro():
     global hashtags
     while True:
         if len(sim)==0:
-            await asyncio.sleep(10)
+            await asyncio.sleep(5)
         else:
             a=sim.pop(0)
             k=0
@@ -54,18 +51,17 @@ async def simpro():
             for post in a.get_posts():
                 for h in post.caption_hashtags:
                     if h in hashtags:
-                        print("+1 from similar accounts")
-                        asyncio.create_task(checkprofile(a,""))
+                        await checkprofile(a,"")
                         don=True
                         break
                 if don:
                     break
                 k+=1
-                if k==5:
+                if k==4:
                     break
 
 
-async def checkprofile(profile,country):
+def checkprofile(profile,country):
     global count
     if profile.username not in users and ("India" in profile.biography or country=="India") : 
         users[profile.username]=True
@@ -76,13 +72,12 @@ async def checkprofile(profile,country):
         for i in profile.get_similar_accounts():
             sim.append(i)
             c+=1
-            if c==10:
+            if c==4:
                 break
         if count == data:
             exit()
 
-async def get_hashtags_posts(query):
-    global count_for_operations
+def get_hashtags_posts(query):
     posts = loader.get_hashtag_posts(query)
     for post in posts:
         profile = post.owner_profile
@@ -97,17 +92,20 @@ async def get_hashtags_posts(query):
                 country=""
         except:
             country=""
-        await checkprofile(profile,country)
+        checkprofile(profile,country)
 
-hashtags = ["clothes","clothing","clothingbrand","cloth","clothesforsale","cloths","clothings","clothingbrands","clothesline","clothingsale"]
+hashtags = ["clothes",  "clothing",  "clothingbrand",  "cloth",  "clothesforsale",  "cloths",
+   "clothings","clothingbrands","clothesline", "clothingsale"]
 
 async def main():
+    global hashtags
     do=True
     while do:
         try:
             for hashtag in hashtags:
-                asyncio.create_task(get_hashtags_posts(hashtag))
-            await asyncio.create_task(simpro())
+                last=asyncio.create_task(get_hashtags_posts(hashtag))
+            asyncio.create_task(simpro())
+            await last
         except:
             await asyncio.sleep(10)
         #do=False
