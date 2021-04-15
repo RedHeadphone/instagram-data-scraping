@@ -28,17 +28,17 @@ db = firestore.client()
 loader = Instaloader()
 # loader.login(os.getenv("IGUSER"),os.getenv("IGPASSWORD"))
 # print(loader.test_login())
-data = 5000
+# data = 5000
 users = {}
-users_ref = db.collection(u'cloth')
-docs = users_ref.stream()
-sim=[]
+# users_ref = db.collection(u'cloth')
+# docs = users_ref.stream()
+# sim=[]
 
-for doc in docs:
-    users[doc.id]=True
-count = len(users.keys())
+# for doc in docs:
+#     users[doc.id]=True
+# count = len(users.keys())
 
-print(count)
+# print(count)
 
 async def simpro():
     global hashtags
@@ -62,11 +62,12 @@ async def simpro():
                     break
 
 
-async def checkprofile(profile,country):
+def checkprofile(profile,country):
     global count
+    print("checking"+profile.username)
     if profile.username not in users and ("India" in profile.biography or country=="India") : 
         users[profile.username]=True
-        db.collection(u'cloth').document(profile.username).set({"username":profile.username,"contact":profile.external_url,"bio":profile.biography,"followers":profile.followers})
+        #db.collection(u'cloth').document(profile.username).set({"username":profile.username,"contact":profile.external_url,"bio":profile.biography,"followers":profile.followers})
         count += 1
         print('{}: {}'.format(count, profile.username))
         c=0
@@ -78,7 +79,7 @@ async def checkprofile(profile,country):
         if count == data:
             exit()
 
-async def get_hashtags_posts(query):
+def get_hashtags_posts(query):
     posts = loader.get_hashtag_posts(query)
     for post in posts:
         profile = post.owner_profile
@@ -93,22 +94,23 @@ async def get_hashtags_posts(query):
                 country=""
         except:
             country=""
-        await checkprofile(profile,country)
+        #print("aya")
+        checkprofile(profile,country)
 
 hashtags = ["clothes",  "clothing",  "clothingbrand",  "cloth",  "clothesforsale",  "cloths",
    "clothings","clothingbrands","clothesline", "clothingsale"]
 
-async def main():
-    global hashtags
-    do=True
-    while do:
-        try:
-            for hashtag in hashtags:
-                last=asyncio.create_task(get_hashtags_posts(hashtag))
-            asyncio.create_task(simpro())
-            await last
-        except:
-            await asyncio.sleep(10)
-        #do=False
-
-asyncio.run(main())
+# async def main():
+#     global hashtags
+#     do=True
+#     while do:
+#         try:
+#             for hashtag in hashtags:
+#                 last=asyncio.create_task(get_hashtags_posts(hashtag))
+#             asyncio.create_task(simpro())
+#             await last
+#         except:
+#             await asyncio.sleep(10)
+#         #do=False
+get_hashtags_posts("cloth")
+# asyncio.run(main())
