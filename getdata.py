@@ -34,10 +34,10 @@ users_ref = db.collection(u'cloth')
 docs = users_ref.stream()
 sim=[]
 
-for doc in docs:
-    users[doc.id]=True
-count = len(users.keys())
-
+# for doc in docs:
+#     users[doc.id]=True
+# count = len(users.keys())
+count=0
 print(count)
 
 async def simpro():
