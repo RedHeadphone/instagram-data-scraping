@@ -113,6 +113,7 @@ async def get_hashtags_posts(hashtag):
 # asyncio.run(main())
 
 r = requests.get("https://www.instagram.com/explore/tags/"+"cloth"+"/?__a=1", headers=headers)
+print(r)
 hashtaginfo = r.json()["graphql"]
 hasht = hashtaginfo["hashtag"]["edge_hashtag_to_media"]["edges"]
 for i in hasht:
