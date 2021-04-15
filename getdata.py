@@ -9,7 +9,7 @@ import firebase_admin
 from firebase_admin import credentials,firestore
 from instaloader import Profile,Instaloader
 L=Instaloader()
-L.login("data.scrap",os.getenv("IGPASSWORD"))
+L.login(os.getenv("IGUSER"),os.getenv("IGPASSWORD"))
 cred = credentials.Certificate({
     "type": "service_account",
   "project_id": "instagram-data-scraping",

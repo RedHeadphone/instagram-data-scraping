@@ -1,1 +1,1 @@
-worker: python getdataog.py
+worker: python getdata.py
