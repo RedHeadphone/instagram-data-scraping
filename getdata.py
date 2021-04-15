@@ -84,7 +84,7 @@ hashtags = ["clothes","clothing","clothingbrand","cloth","clothesforsale","cloth
 
 
 async def get_hashtags_posts(hashtag):
-    r = requests.get(f"https://www.instagram.com/explore/tags/{hashtag}/?__a=1", headers=headers)
+    r = requests.get("https://www.instagram.com/explore/tags/"+hashtag+"/?__a=1", headers=headers)
     hashtaginfo = r.json()["graphql"]
     hasht = hashtaginfo["hashtag"]["edge_hashtag_to_media"]["edges"]
     for i in hasht:
