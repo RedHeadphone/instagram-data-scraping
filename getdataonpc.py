@@ -25,18 +25,18 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 loader = Instaloader()
-# loader.login(os.getenv("IGUSER"),os.getenv("IGPASSWORD"))
-# print(loader.test_login())
+loader.login(os.getenv("IGUSER"),os.getenv("IGPASSWORD"))
+print(loader.test_login())
 data = 5000
 users = {}
 users_ref = db.collection(u'cloth')
 docs = users_ref.stream()
 sim=[]
 
-for doc in docs:
-    users[doc.id]=True
-count = len(users.keys())
-
+# for doc in docs:
+#     users[doc.id]=True
+# count = len(users.keys())
+count=0
 print(count)
 
 async def simpro():
