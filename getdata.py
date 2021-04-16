@@ -1,4 +1,5 @@
-from instaloader import Instaloader, Profile
+from instaloader import Instaloader, Profile,resumable_iteration
+import instaloader
 from dotenv import load_dotenv
 import os,asyncio
 from geopy.geocoders import Nominatim
@@ -79,21 +80,38 @@ async def checkprofile(profile,country):
             exit()
 
 async def get_hashtags_posts(query):
-    posts = loader.get_hashtag_posts(query)
-    for post in posts:
-        profile = post.owner_profile
-        try:
-            if post.location is not None:
-                lat = (post.location).lat
-                lng = (post.location).lng
-                location = geolocator.reverse(str(lat)+","+str(lng))
-                address = location.raw['address']
-                country = address.get('country', '')
-            else:
+    post_iterator = instaloader.NodeIterator(
+        loader.context, "9b498c08113f1e09617a1703c22b2f32",
+        lambda d: d['data']['hashtag']['edge_hashtag_to_media'],
+        lambda n: instaloader.Post(loader.context, n),
+        {'tag_name': query},
+        f"https://www.instagram.com/explore/tags/{query}/"
+    )
+    with resumable_iteration(
+            context=loader.context,
+            iterator=post_iterator,
+            load=lambda _, path: FrozenNodeIterator(**json.load(open(path))),
+            save=lambda fni, path: json.dump(fni._asdict(), open(path, 'w')),
+            format_path=lambda magic: "resume_info_{}.json".format(magic)
+    ) as (is_resuming, start_index):
+        for post in post_iterator:
+            print(post.owner_profile.username)
+            profile = post.owner_profile
+            try:
+                if post.location is not None:
+                    lat = (post.location).lat
+                    lng = (post.location).lng
+                    location = geolocator.reverse(str(lat)+","+str(lng))
+                    address = location.raw['address']
+                    country = address.get('country', '')
+                else:
+                    country=""
+            except:
                 country=""
-        except:
-            country=""
-        await checkprofile(profile,country)
+            await checkprofile(profile,country)
+        # posts = loader.get_hashtag_posts(query)
+        # for post in posts:
+            
 
 hashtags = ["clothes",  "clothing",  "clothingbrand",  "cloth",  "clothesforsale",  "cloths",
    "clothings","clothingbrands","clothesline", "clothingsale"]
@@ -101,6 +119,7 @@ hashtags = ["clothes",  "clothing",  "clothingbrand",  "cloth",  "clothesforsale
 async def main():
     global hashtags
     do=True
+    #await get_hashtags_posts("clothes")
     while do:
         try:
             for hashtag in hashtags:
@@ -108,7 +127,8 @@ async def main():
             asyncio.create_task(simpro())
             await last
         except:
+            print("error aya")
             await asyncio.sleep(10)
-        #do=False
+        # do=False
 
 asyncio.run(main())
