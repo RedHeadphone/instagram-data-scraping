@@ -8,7 +8,7 @@ import re
 from instaloader import Instaloader, Profile
 loader = Instaloader()
 loader.login(os.getenv("IGUSER"),os.getenv("IGPASSWORD"))
-df=pd.read_csv('data.csv')
+data=pd.read_csv('data.csv')
 
 c=0
 for index, row in data.iterrows():
@@ -16,4 +16,4 @@ for index, row in data.iterrows():
         data.loc[index,"followers"]= Profile.from_username(loader.context, data.loc[index,"username"]).followers
 
 
-df.to_csv("data-cloth.csv")
+data.to_csv("data-cloth.csv")
