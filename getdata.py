@@ -95,7 +95,7 @@ async def get_hashtags_posts(query):
             format_path=lambda magic: "resume_info_{}.json".format(magic)
     ) as (is_resuming, start_index):
         for post in post_iterator:
-            print(post.owner_profile.username)
+            #print(post.owner_profile.username)
             profile = post.owner_profile
             try:
                 if post.location is not None:
