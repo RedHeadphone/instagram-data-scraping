@@ -32,18 +32,19 @@ db = firestore.client()
 
 users_ref = db.collection(u'cloth')
 docs = users_ref.stream()
-
+c=0
 for doc in docs:
     de=doc.to_dict()
     lst = re.findall('\S+@\S+', de["bio"])
     k=Phonenumber.findall(de["bio"])
     de["phone_num"]=" ".join(k) if len(k)>0 else None
     de["email"]=" ".join(lst) if len(lst)>0 else None
-    try:
-        if not ("followers" in de.keys()):
-            de["followers"]=Profile.from_username(loader.context,de["username"]).followers
-    except:
-        pass
+    # try:
+    #     if not ("followers" in de.keys()):
+    #         de["followers"]=Profile.from_username(loader.context,de["username"]).followers
+    # except:
+    #     pass
     df=df.append(de,ignore_index=True)
-
+    c+=1
+print(c)
 df.to_csv("data.csv")
