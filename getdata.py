@@ -29,45 +29,43 @@ db = firestore.client()
 loader = Instaloader()
 loader.login(os.getenv("IGUSER"),os.getenv("IGPASSWORD"))
 print(loader.test_login())
-data = 5000
+data = 1300
 users = {}
-users_ref = db.collection(u'cloth')
+users_ref = db.collection(u'kidwear')
 docs = users_ref.stream()
 sim=[]
 
-# for doc in docs:
-#     users[doc.id]=True
-# count = len(users.keys())
+for doc in docs:
+    users[doc.id]=True
+count = len(users.keys())
 count=0
 print(count)
 
-async def simpro():
+def simpro():
     global hashtags
-    while True:
-        if len(sim)==0:
-            await asyncio.sleep(5)
-        else:
-            a=sim.pop(0)
-            k=0
-            don=False
-            for post in a.get_posts():
-                for h in post.caption_hashtags:
-                    if h in hashtags:
-                        await checkprofile(a,"")
-                        don=True
-                        break
-                if don:
-                    break
-                k+=1
-                if k==4:
-                    break
+    if len(sim)==0:
+        return
+    a=sim.pop(0)
+    k=0
+    don=False
+    for post in a.get_posts():
+        for h in post.caption_hashtags:
+            if h in hashtags:
+                checkprofile(a,"")
+                don=True
+                break
+        if don:
+            break
+        k+=1
+        if k==4:
+            break
 
 
-async def checkprofile(profile,country):
+def checkprofile(profile,country):
     global count
     if profile.username not in users and ("India" in profile.biography or country=="India") : 
         users[profile.username]=True
-        db.collection(u'cloth').document(profile.username).set({"username":profile.username,"contact":profile.external_url,"bio":profile.biography,"followers":profile.followers})
+        db.collection(u'kidwear').document(profile.username).set({"username":profile.username,"link-given":profile.external_url,"bio":profile.biography,"followers":profile.followers})
         count += 1
         print('{}: {}'.format(count, profile.username))
         c=0
@@ -79,14 +77,8 @@ async def checkprofile(profile,country):
         if count == data:
             exit()
 
-async def get_hashtags_posts(query):
-    post_iterator = instaloader.NodeIterator(
-        loader.context, "9b498c08113f1e09617a1703c22b2f32",
-        lambda d: d['data']['hashtag']['edge_hashtag_to_media'],
-        lambda n: instaloader.Post(loader.context, n),
-        {'tag_name': query},
-        f"https://www.instagram.com/explore/tags/{query}/"
-    )
+def get_hashtags_posts(post_iterator):
+    c=0
     with resumable_iteration(
             context=loader.context,
             iterator=post_iterator,
@@ -95,7 +87,9 @@ async def get_hashtags_posts(query):
             format_path=lambda magic: "resume_info_{}.json".format(magic)
     ) as (is_resuming, start_index):
         for post in post_iterator:
-            #print(post.owner_profile.username)
+            c+=1
+            if c==20:
+                return
             profile = post.owner_profile
             try:
                 if post.location is not None:
@@ -108,27 +102,31 @@ async def get_hashtags_posts(query):
                     country=""
             except:
                 country=""
-            await checkprofile(profile,country)
-        # posts = loader.get_hashtag_posts(query)
-        # for post in posts:
+            checkprofile(profile,country)
             
 
-hashtags = ["clothes",  "clothing",  "clothingbrand",  "cloth",  "clothesforsale",  "cloths",
-   "clothings","clothingbrands","clothesline", "clothingsale"]
+hashtags = ["kidsclothes","kidswear","kidsfashion","kidzfashion","kidsclothing","kidsclothesforsales","kidclothes"]
 
 async def main():
     global hashtags
+    loa=[]
+    for i in hashtags:
+        post_iterator = instaloader.NodeIterator(
+            loader.context, "9b498c08113f1e09617a1703c22b2f32",
+            lambda d: d['data']['hashtag']['edge_hashtag_to_media'],
+            lambda n: instaloader.Post(loader.context, n),
+            {'tag_name': i},
+            f"https://www.instagram.com/explore/tags/{i}/"
+        )
+        loa.append(post_iterator)
     do=True
-    #await get_hashtags_posts("clothes")
     while do:
-        try:
-            for hashtag in hashtags:
-                last=asyncio.create_task(get_hashtags_posts(hashtag))
-            asyncio.create_task(simpro())
-            await last
-        except:
-            print("error aya")
-            await asyncio.sleep(10)
-        # do=False
+        for i in loa:
+            try:
+                get_hashtags_posts(i)
+                simpro()
+                await asyncio.sleep(5)
+            except:
+                await asyncio.sleep(5)
 
 asyncio.run(main())
